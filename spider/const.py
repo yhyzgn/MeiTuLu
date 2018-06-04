@@ -6,7 +6,7 @@
   e-mail  : yhyzgn@gmail.com
   time    : 2018-06-02 20:55
   version : 1.0.0
-  desc    : 
+  desc    : 一些常量
 """
 
 URL = "https://www.meitulu.com"

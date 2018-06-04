@@ -6,7 +6,7 @@
   e-mail  : yhyzgn@gmail.com
   time    : 2018-06-02 20:54
   version : 1.0.0
-  desc    : 
+  desc    : 加载器
 """
 
 from . import const
@@ -125,6 +125,11 @@ def get_item_list_page_urls(index, cate):
 
 
 def get_item_page_urls(cate):
+    """
+    获取分类下所有分页的链接
+    :param cate: 一个分类
+    :return: 加入所有分页后的分类
+    """
     items = cate[4]
     for i in range(0, len(items)):
         itemUrl = items[i][0]
@@ -140,14 +145,23 @@ def get_item_page_urls(cate):
 
         temp.append(urls)
         items[i] = tuple(temp)
-    # print(cate)
 
 
 def get_item_id(url):
+    """
+    获取item的id编号
+    :param url: item第一页的链接
+    :return: 编号
+    """
     return re.findall(const.PT_ITEM_ID, url)
 
 
 def get_img_list_all(cate):
+    """
+    获取一个分类下的所有图片地址
+    :param cate: 一个分类
+    :return: 将图片地址加入当前分类，并返回
+    """
     data = cate[4]
     for i in range(len(data)):
         imgCount = int(data[i][0])
@@ -162,28 +176,51 @@ def get_img_list_all(cate):
 
 
 def md5(content):
+    """
+    MD5加密
+    :param content: 原始内容
+    :return: 加密后的内容
+    """
     md5 = hashlib.md5()
     md5.update(content.encode(encoding="utf-8"))
     return md5.hexdigest()
 
 
-def download_img(dir, url, referer):
-    imgName = dir + "/" + md5(url) + ".jpg"
+def download_img(path, url, item):
+    """
+    下载图片
+    :param path: 保存路径
+    :param url: 下载地址
+    :param item: 所属条目
+    :return: None
+    """
+    imgName = path + "/" + md5(url) + ".jpg"
 
     if os.path.exists(imgName):
+        # 图片已经存在
         return
     headers = const.DOWNLOADER_HEADERS
-    headers["Referer"] = referer
+    headers["Referer"] = item[3]
+
+    res = requests.get(url, headers=headers)
+    with open(imgName, "wb") as f:
+        f.write(res.content)
+    res.close()
+
+    print(item[4] + " [" + url + "] 已下载到 [" + imgName + "]")
 
 
 def load(root=""):
     """
     加载所有数据
-    :return: null
+    :param root: 保存路径
+    :return: None
     """
 
     root = root.strip("\\").strip("/")
     data = []
+
+    print("正在获取资源，可能需要等待几分钟...")
 
     # 先获取所有分类
     cateList = get_cate_list(req())
@@ -217,45 +254,23 @@ def load(root=""):
 
     del cateList
 
+    print("资源获取完成，开始下载...")
+
     for i in range(0, len(data)):
         # 创建分类目录——女神（30）
-        cateDir = root + "/" + data[i]["name"] + "（" + data[i]["itemCount"] + "）"
+        cateDir = root + "/" + data[i]["name"] + "（" + str(data[i]["itemCount"]) + "）"
         if not os.path.exists(cateDir):
             os.makedirs(cateDir)
 
         items = data[i]["items"]
         for j in range(0, len(items)):
-            itemDir = cateDir + "/" + items[j][5] + "_" + items[j][0] + "张_" + items[1] + "x" + items[j][2]
+            itemDir = cateDir + "/" + items[j][4] + "_" + items[j][0] + "张_" + items[j][1] + "x" + items[j][2]
             if not os.path.exists(itemDir):
                 os.makedirs(itemDir)
 
             imgs = items[j][5]
             for k in range(0, len(imgs)):
-                download_img(itemDir, imgs[k], items[j][4])
-                # imgName = md5(imgs[k])
-                # headers = const.DOWNLOADER_HEADERS
-                # headers["Referer"] = items[j][4]
+                print(imgs[k])
+                download_img(itemDir, imgs[k], items[j])
 
-    # print(data[0])
-
-    # 创建分类目录——女神（30）
-    # cateDir = root + cateList[i][1] + "（" + cateList[i][2] + "）"
-    # if not os.path.exists(cateDir):
-    #     os.makedirs(cateDir)
-
-    # get_item_page_urls(cateList[i])
-
-    # itemUrls = cateList[i][4]
-    # print(imgUrls)
-    # for j in range(0, len(imgUrls)):
-    #     imgList = get_imgs(req(imgUrls[j][0]))
-
-    # item = {}
-    # item["cate"] = cateList[i][1]
-    # item["count"] = cateList[i][2]
-    #
-    # data.append(item)
-
-    # print(data)
-
-    return ""
+    print("所有图片下载完成！")
