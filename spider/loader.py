@@ -12,6 +12,8 @@
 from . import const
 import requests
 import re
+import hashlib
+import os
 
 
 def req(url=const.URL):
@@ -48,18 +50,15 @@ def get_item_list(html):
     :param html: html代码
     :return: item列表
     """
-    return re.findall(const.PT_ITEM, html)
+    return re.findall(const.PT_ITEM, html.replace("\n", ""))
 
-
-def get_item_count_attrs(html):
-    """
-    获取所有item的数量和属性
-    :param html: html代码
-    :return: item的数量和属性
-    """
-    return re.findall(const.PT_COUNT, html)
 
 def get_imgs(html):
+    """
+    获取图片地址
+    :param html: html代码
+    :return: 图片地址列表
+    """
     return re.findall(const.PT_IMG, html)
 
 
@@ -101,6 +100,7 @@ def get_item_list_of_cate(cate):
     itemList = []
     for i in range(0, cate[2]):
         url = get_item_list_page_urls(i, cate)
+
         urls.append(url)
 
         # 加载每个cate下的每一页item列表
@@ -124,11 +124,66 @@ def get_item_list_page_urls(index, cate):
     return url
 
 
-def load():
+def get_item_page_urls(cate):
+    items = cate[4]
+    for i in range(0, len(items)):
+        itemUrl = items[i][0]
+        itemName = items[i][1]
+        temp = list(items[i])
+        urls = []
+
+        for j in range(0, cate[2]):
+            if j > 0:
+                itemUrl = items[i][0].replace(".html", "_" + str(j + 1) + ".html")
+            print(itemUrl)
+            urls.append(itemUrl)
+
+        temp.append(urls)
+        items[i] = tuple(temp)
+    # print(cate)
+
+
+def get_item_id(url):
+    return re.findall(const.PT_ITEM_ID, url)
+
+
+def get_img_list_all(cate):
+    data = cate[4]
+    for i in range(len(data)):
+        imgCount = int(data[i][0])
+        itemId = get_item_id(data[i][3])
+        imgList = []
+        for j in range(0, imgCount):
+            imgList.append(const.IMG_URL + itemId[0] + "/" + str(j + 1) + ".jpg")
+        temp = list(cate[4][i])
+        temp.append(imgList)
+        cate[4][i] = tuple(temp)
+    return cate
+
+
+def md5(content):
+    md5 = hashlib.md5()
+    md5.update(content.encode(encoding="utf-8"))
+    return md5.hexdigest()
+
+
+def download_img(dir, url, referer):
+    imgName = dir + "/" + md5(url) + ".jpg"
+
+    if os.path.exists(imgName):
+        return
+    headers = const.DOWNLOADER_HEADERS
+    headers["Referer"] = referer
+
+
+def load(root=""):
     """
     加载所有数据
     :return: null
     """
+
+    root = root.strip("\\").strip("/")
+    data = []
 
     # 先获取所有分类
     cateList = get_cate_list(req())
@@ -140,14 +195,67 @@ def load():
         temp.append(pageCount)
         cateList[i] = tuple(temp)
 
-        # print(cateList[i][1] + " : " + str(pageCount) + " 页")
-        # print(cateList[i])
-
         # 将分类下的所有分页子url和每个子url页面中对应的item列表都放到该分类的元组中
         cateList[i] = get_item_list_of_cate(cateList[i])
-        # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-        # print(cateList[i])
+
         # 目前为止，已经将每个分类下的item列表html页面url全部拿到
-        # ('https://www.meitulu.com/t/nvshen/', '女神', 30, ['cate/2.html','cate/3.html'], [('https://www.meitulu.com/item/13585.html', '[MICAT瑞丝馆] Vol.037 清纯甜美妹子@米粒sweet'),()])
+        cateList[i] = get_img_list_all(cateList[i])
+
+        # cateList[i][0] -> 分类第一页连接
+        # cateList[i][1] -> 分类名称
+        # cateList[i][2] -> 分类下条目总数
+        # cateList[i][3] -> 分类下所有分页连接
+        # cateList[i][4] -> 分类下所有条目信息（图片张数，图片宽，图片高，条目第一页连接，条目名称，条目中的所有图片地址）
+
+        cate = {
+            "name": cateList[i][1],
+            "itemCount": cateList[i][2],
+            "items": cateList[i][4]
+        }
+
+        data.append(cate)
+
+    del cateList
+
+    for i in range(0, len(data)):
+        # 创建分类目录——女神（30）
+        cateDir = root + "/" + data[i]["name"] + "（" + data[i]["itemCount"] + "）"
+        if not os.path.exists(cateDir):
+            os.makedirs(cateDir)
+
+        items = data[i]["items"]
+        for j in range(0, len(items)):
+            itemDir = cateDir + "/" + items[j][5] + "_" + items[j][0] + "张_" + items[1] + "x" + items[j][2]
+            if not os.path.exists(itemDir):
+                os.makedirs(itemDir)
+
+            imgs = items[j][5]
+            for k in range(0, len(imgs)):
+                download_img(itemDir, imgs[k], items[j][4])
+                # imgName = md5(imgs[k])
+                # headers = const.DOWNLOADER_HEADERS
+                # headers["Referer"] = items[j][4]
+
+    # print(data[0])
+
+    # 创建分类目录——女神（30）
+    # cateDir = root + cateList[i][1] + "（" + cateList[i][2] + "）"
+    # if not os.path.exists(cateDir):
+    #     os.makedirs(cateDir)
+
+    # get_item_page_urls(cateList[i])
+
+    # itemUrls = cateList[i][4]
+    # print(imgUrls)
+    # for j in range(0, len(imgUrls)):
+    #     imgList = get_imgs(req(imgUrls[j][0]))
+
+    # item = {}
+    # item["cate"] = cateList[i][1]
+    # item["count"] = cateList[i][2]
+    #
+    # data.append(item)
+
+    # print(data)
 
     return ""
