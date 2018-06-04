@@ -140,7 +140,6 @@ def get_item_page_urls(cate):
         for j in range(0, cate[2]):
             if j > 0:
                 itemUrl = items[i][0].replace(".html", "_" + str(j + 1) + ".html")
-            print(itemUrl)
             urls.append(itemUrl)
 
         temp.append(urls)
@@ -270,7 +269,6 @@ def load(root=""):
 
             imgs = items[j][5]
             for k in range(0, len(imgs)):
-                print(imgs[k])
                 download_img(itemDir, imgs[k], items[j])
 
     print("所有图片下载完成！")
