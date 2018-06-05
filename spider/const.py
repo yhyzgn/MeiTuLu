@@ -24,7 +24,7 @@ PT_ITEM_ID = r'https://www\.meitulu\.com/item/(\d+)\.html'
 DOWNLOADER_HEADERS = {"Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
                       "Accept-Encoding": "gzip, deflate, br",
                       "Accept-Language": "zh-CN,zh;q=0.9",
-                      "Cache-Control": "max-age=0",
+                      "Cache-Control": "no-store",
                       "Connection": "keep-alive",
                       "Host": "mtl.ttsqgs.com",
                       # "If-Modified-Since": "Wed, 05 Jul 2017 10:48:00 GMT",

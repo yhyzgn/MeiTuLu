@@ -11,8 +11,8 @@
 
 from spider import loader
 
-# from spider import const
-# import requests
+from spider import const
+import requests
 
 # 图片保存目录（根路径）
 ROOT = "E:/图片/抓图/美图录"
