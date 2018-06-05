@@ -11,9 +11,15 @@
 
 from spider import loader
 
+# from spider import const
+# import requests
+
 # 图片保存目录（根路径）
 ROOT = "E:/图片/抓图/美图录"
 
 if __name__ == "__main__":
     # 开始加载
     loader.load(ROOT)
+
+    # res = requests.get("https://mtl.ttsqgs.com/images/img/14277/1.jpg", headers=const.DOWNLOADER_HEADERS)
+    # print(res.status_code)

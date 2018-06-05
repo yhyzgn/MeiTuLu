@@ -27,8 +27,8 @@ DOWNLOADER_HEADERS = {"Accept": "text/html,application/xhtml+xml,application/xml
                       "Cache-Control": "max-age=0",
                       "Connection": "keep-alive",
                       "Host": "mtl.ttsqgs.com",
-                      "If-Modified-Since": "Wed, 05 Jul 2017 10:48:00 GMT",
-                      "If-None-Match": "f847bc2b7cf5d21:0",
+                      # "If-Modified-Since": "Wed, 05 Jul 2017 10:48:00 GMT",
+                      # "If-None-Match": "f847bc2b7cf5d21:0",
                       "Upgrade-Insecure-Requests": "1",
                       "Referer": "https://www.meitulu.com/item/14258.html",
-                      "User-Agent": "ozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"}
+                      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.181 Safari/537.36"}
