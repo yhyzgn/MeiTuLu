@@ -207,6 +207,10 @@ def download_img(path, url, item):
     print(item[4] + " [" + url + "] 已下载到 [" + imgName + "]")
 
 
+def dir_name_filter(name):
+    return name.replace("/", "").replace("\\", "").replace(":", "：").replace("*", "").replace("?", "？").replace("\"", " ").replace("|", "").replace("<", "《").replace(">", "》")
+
+
 def load(root=""):
     """
     加载所有数据
@@ -256,13 +260,15 @@ def load(root=""):
 
     for i in range(0, len(data)):
         # 创建分类目录——女神（30）
-        cateDir = root + "/" + data[i]["name"] + "（" + str(data[i]["itemCount"]) + "）"
+        temp = dir_name_filter(data[i]["name"] + "（" + str(data[i]["itemCount"]) + "）")
+        cateDir = root + "/" + temp
         if not os.path.exists(cateDir):
             os.makedirs(cateDir)
 
         items = data[i]["items"]
         for j in range(0, len(items)):
-            itemDir = cateDir + "/" + "[" + str(j + 1) + "]" + items[j][4] + "_" + items[j][0] + "张_" + items[j][1] + "x" + items[j][2]
+            temp = dir_name_filter("[" + str(j + 1) + "]" + items[j][4] + "_" + items[j][0] + "张_" + items[j][1] + "x" + items[j][2])
+            itemDir = cateDir + "/" + temp
             if not os.path.exists(itemDir):
                 os.makedirs(itemDir)
 
