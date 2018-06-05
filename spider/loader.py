@@ -73,20 +73,18 @@ def get_item_list_size_and_total_of_cate(url):
     pagesize = len(re.findall(r'<li>', res[0]))
     total = re.findall(r'<a class="a1">(\d+)条</a>', html)
     if len(total) == 0:
-        return pagesize, 0
+        return pagesize, pagesize
     return pagesize, int(total[0])
 
 
-def get_item_list_page_count_of_cate(url):
+def get_item_list_page_count_of_cate(item_count):
     """
     获取每个分类下item中的总页数
+    :param item_count: 条目数量
     :return: 总页数
     """
-    result = get_item_list_size_and_total_of_cate(url)
-    pagesize = result[0]
-    total = result[1]
-    if total == 0:
-        return 1
+    pagesize = item_count[0]
+    total = item_count[1]
     return int((total + pagesize - 1) / pagesize)
 
 
@@ -226,7 +224,8 @@ def load(root=""):
 
     # 遍历每个分类，再去获取分类下的item列表，最后将每个分类下的页数添加到对应分类中
     for i in range(0, len(cateList)):
-        pageCount = get_item_list_page_count_of_cate(cateList[i][0])
+        itemCount = get_item_list_size_and_total_of_cate(cateList[i][0])
+        pageCount = get_item_list_page_count_of_cate(itemCount)
         temp = list(cateList[i])
         temp.append(pageCount)
         cateList[i] = tuple(temp)
@@ -245,7 +244,7 @@ def load(root=""):
 
         cate = {
             "name": cateList[i][1],
-            "itemCount": cateList[i][2],
+            "itemCount": itemCount[1],
             "items": cateList[i][4]
         }
 
@@ -263,7 +262,7 @@ def load(root=""):
 
         items = data[i]["items"]
         for j in range(0, len(items)):
-            itemDir = cateDir + "/" + items[j][4] + "_" + items[j][0] + "张_" + items[j][1] + "x" + items[j][2]
+            itemDir = cateDir + "/" + "[" + str(j + 1) + "]" + items[j][4] + "_" + items[j][0] + "张_" + items[j][1] + "x" + items[j][2]
             if not os.path.exists(itemDir):
                 os.makedirs(itemDir)
 

@@ -12,7 +12,7 @@
 from spider import loader
 
 # 图片保存目录（根路径）
-ROOT = "D:/Files/图片/抓图/美图录"
+ROOT = "E:/图片/抓图/美图录"
 
 if __name__ == "__main__":
     # 开始加载
